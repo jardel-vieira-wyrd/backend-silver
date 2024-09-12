@@ -54,3 +54,32 @@ git remote add origin https://github.com/$GITHUB_USERNAME/$PROJECT_NAME.git
 
 # Push the commit to the main branch
 git push -u origin main
+
+## Set Up NestJS Project
+
+### 1. Install NestJS CLI
+
+Install the NestJS CLI globally:
+
+npm install -g @nestjs/cli
+
+### 2. Create NestJS Project
+
+Create a new NestJS project in the current directory:
+
+nest new . --package-manager npm
+
+When prompted, select npm as the package manager.
+
+This command will create the basic structure for a NestJS application, including:
+- src/ directory with main.ts, app.module.ts, app.controller.ts, and app.service.ts
+- test/ directory for your tests
+- nest-cli.json configuration file
+- package.json with project dependencies
+- tsconfig.json for TypeScript configuration
+
+To verify that the NestJS environment is set up correctly, run the default tests:
+
+npm run test
+
+You should see output indicating that the tests have passed.
