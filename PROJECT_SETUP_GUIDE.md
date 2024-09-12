@@ -7,10 +7,11 @@
 Before beginning this project, ensure you have the following tools installed and configured:
 
 - GitHub CLI
+- Docker
 
 ### Verify Tool Installation
 
-Run the following command to verify that your GitHub CLI is correctly installed and configured:
+Run the following commands to verify that your tools are correctly installed and configured:
 
 Verify GitHub CLI
 gh auth status
@@ -20,6 +21,11 @@ github.com
   ✓ Logged in to github.com as <YOUR_USERNAME> (<YOUR_EMAIL>)
   ✓ Git operations for github.com configured to use https
   ✓ Token: *******************
+
+Verify Docker
+docker --version && docker info
+
+Expected output should show Docker version information and system-wide information about the Docker installation.
 
 ## Create Repository
 
@@ -83,3 +89,104 @@ To verify that the NestJS environment is set up correctly, run the default tests
 npm run test
 
 You should see output indicating that the tests have passed.
+
+## Set Up PostgreSQL Database with Docker
+
+### 1. Define Database Variables
+
+Export the necessary environment variables:
+
+export DB_NAME="backenddb"
+export DB_USER="postgres"
+export DB_PASSWORD="nestjsprisma"
+export DB_PORT="5432"
+export DOCKER_CONTAINER_NAME="postgres-db"
+
+### 2. Create and Run PostgreSQL Container
+
+Create and start the PostgreSQL container:
+
+docker run --name $DOCKER_CONTAINER_NAME -e POSTGRES_DB=$DB_NAME -e POSTGRES_USER=$DB_USER -e POSTGRES_PASSWORD=$DB_PASSWORD -p $DB_PORT:5432 -d postgres
+
+### 3. Verify Container Status
+
+Check if the container is running:
+
+docker ps
+
+You should see your container listed in the output.
+
+## Set Up Prisma ORM and Database Schema
+
+### 1. Install Prisma dependencies
+
+Install Prisma CLI as a dev dependency:
+
+npm install prisma --save-dev
+
+Install Prisma Client as a regular dependency:
+
+npm install @prisma/client
+
+### 2. Initialize Prisma in the project
+
+Run Prisma init command:
+
+npx prisma init
+
+### 3. Configure database connection
+
+Remove existing DATABASE_URL from .env:
+
+grep -v DATABASE_URL .env > .env.tmp && mv .env.tmp .env
+
+Add correct DATABASE_URL to .env:
+
+echo "DATABASE_URL=\"postgresql://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}?schema=public\"" >> .env
+
+### 4. Create initial Prisma schema
+
+Update the prisma/schema.prisma file with the following content:
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+### 5. Create and apply database migration
+
+Create and apply the initial migration:
+
+npx prisma migrate dev --name init
+
+This command creates a new migration based on your schema changes and applies it to the database.
+
+Note: For production deployments, you'll need to use `npx prisma migrate deploy` as part of your deployment process to apply migrations to your production database.
+
+### 6. Verify Prisma schema synchronization
+
+To verify that your Prisma schema is correctly synchronized with the database, run:
+
+npx prisma db push
+
+The expected output should be:
+
+The database is already in sync with the Prisma schema.
+
+If you see this message, it means your database connection is working correctly and the schema is synchronized.
