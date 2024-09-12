@@ -26,3 +26,31 @@ github.com
 ### 1. Initialize Git Repository
 
 git init
+
+### 2. Create Remote Repository and Push Initial Commit
+
+# Set environment variables
+export PROJECT_NAME="backend-nestjs"
+export GITHUB_USERNAME="jardel-vieira-wyrd"
+
+# Create the remote repository
+gh repo create $PROJECT_NAME --public --confirm
+
+# Add all files to git
+git add .
+
+# Commit the files
+git commit -m "Initial commit: Add project setup guide"
+
+# Set the correct Git user name and email
+git config user.name "jardel-vieira-wyrd"
+git config user.email "jardel.vieira@wyrd.com.br"
+
+# Set the main branch
+git branch -M main
+
+# Add the remote repository
+git remote add origin https://github.com/$GITHUB_USERNAME/$PROJECT_NAME.git
+
+# Push the commit to the main branch
+git push -u origin main
