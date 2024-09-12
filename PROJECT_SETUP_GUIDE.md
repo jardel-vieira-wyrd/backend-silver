@@ -15,6 +15,12 @@ Run the following command to verify that your GitHub CLI is correctly installed 
 Verify GitHub CLI
 gh auth status
 
+Expected output should be similar to:
+github.com
+  ✓ Logged in to github.com as <YOUR_USERNAME> (<YOUR_EMAIL>)
+  ✓ Git operations for github.com configured to use https
+  ✓ Token: *******************
+
 ## Create Repository
 
 ### 1. Initialize Git Repository
