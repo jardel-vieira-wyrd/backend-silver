@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma } from '@prisma/client';
 
@@ -32,9 +32,16 @@ export class UserService {
   }
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user.create({
-      data,
-    });
+    try {
+      return await this.prisma.user.create({
+        data,
+      });
+    } catch (error) {
+      if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
+        throw new ConflictException('Email already exists');
+      }
+      throw error;
+    }
   }
 
   async updateUser(params: {
@@ -42,10 +49,17 @@ export class UserService {
     data: Prisma.UserUpdateInput;
   }): Promise<User> {
     const { where, data } = params;
-    return this.prisma.user.update({
-      data,
-      where,
-    });
+    try {
+      return await this.prisma.user.update({
+        data,
+        where,
+      });
+    } catch (error) {
+      if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
+        throw new ConflictException('Email already exists');
+      }
+      throw error;
+    }
   }
 
   async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
