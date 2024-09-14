@@ -22,7 +22,11 @@ export class AuthService {
   async login(user: any) {
     const payload = { email: user.email, sub: user.id };
     return {
-      access_token: this.jwtService.sign(payload),
+      user: {
+        name: user.name,
+        email: user.email,
+      },
+      token: this.jwtService.sign(payload),
     };
   }
 
@@ -33,6 +37,12 @@ export class AuthService {
       password: hashedPassword,
     });
     const { password, ...result } = user;
-    return result;
+    return {
+      user: {
+        name: result.name,
+        email: result.email,
+      },
+      token: this.jwtService.sign({ email: result.email, sub: result.id }),
+    };
   }
 }
