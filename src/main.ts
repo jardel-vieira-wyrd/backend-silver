@@ -7,6 +7,13 @@ import * as yaml from 'js-yaml';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Configure CORS
+  app.enableCors({
+    origin: /^http:\/\/localhost(:\d+)?$/,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
+
   const document = yaml.load(fs.readFileSync('./swagger.yaml', 'utf8'));
   SwaggerModule.setup('api', app, document as any);
 
