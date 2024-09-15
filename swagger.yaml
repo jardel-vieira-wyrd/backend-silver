@@ -160,14 +160,14 @@ paths:
 
   /tasks/projects:
     get:
-      summary: Get tasks grouped by project (limited to 100 tasks)
+      summary: Get tasks grouped by project with user permissions
       tags:
         - Tasks
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Tasks grouped by project
+          description: Tasks grouped by project with user permissions
           content:
             application/json:
               schema:
@@ -175,7 +175,9 @@ paths:
                 additionalProperties:
                   type: array
                   items:
-                    $ref: '#/components/schemas/Task'
+                    $ref: '#/components/schemas/TaskWithPermissions'
+        '401':
+          description: Unauthorized
 
   /health:
     get:
@@ -196,6 +198,31 @@ paths:
                   message:
                     type: string
                     example: "API is running"
+
+  /tasks/permissions:
+    post:
+      summary: Create a new permission for a user on a task
+      tags:
+        - Tasks
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskPermissionDto'
+      responses:
+        '201':
+          description: Permission created successfully
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '404':
+          description: User or Task not found
+        '409':
+          description: Permission already exists
 
 components:
   schemas:
@@ -322,6 +349,67 @@ components:
         updatedAt:
           type: string
           format: date-time
+
+    TaskWithPermissions:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        project:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [TO_DO, DOING, DONE, CANCELED]
+        priority:
+          type: integer
+        deadline:
+          type: string
+          format: date-time
+        list:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        userPermissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserPermission'
+
+    UserPermission:
+      type: object
+      properties:
+        userId:
+          type: integer
+        email:
+          type: string
+        role:
+          type: string
+          enum: [OWNER, EXECUTOR, STAKEHOLDER]
+
+    CreateTaskPermissionDto:
+      type: object
+      properties:
+        userId:
+          type: integer
+        taskId:
+          type: integer
+        role:
+          $ref: '#/components/schemas/PermissionLevel'
+      required:
+        - userId
+        - taskId
+        - role
+
+    PermissionLevel:
+      type: string
+      enum: [OWNER, EXECUTOR, STAKEHOLDER]
 
   securitySchemes:
     bearerAuth:

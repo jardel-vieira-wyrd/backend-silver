@@ -8,25 +8,40 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              Int              @id @default(autoincrement())
+  email           String           @unique
+  name            String?
+  password        String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  taskPermissions TaskPermission[]
 }
 
 model Task {
-  id          Int        @id @default(autoincrement())
-  title       String
-  project     String
-  description String?
-  status      TaskStatus @default(TO_DO)
-  priority    Int?
-  deadline    DateTime?
-  list        String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id              Int              @id @default(autoincrement())
+  title           String
+  project         String
+  description     String?
+  status          TaskStatus       @default(TO_DO)
+  priority        Int?
+  deadline        DateTime?
+  list            String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  taskPermissions TaskPermission[]
+}
+
+model TaskPermission {
+  id         Int             @id @default(autoincrement())
+  userId     Int
+  taskId     Int
+  role       PermissionLevel
+  user       User            @relation(fields: [userId], references: [id])
+  task       Task            @relation(fields: [taskId], references: [id])
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([userId, taskId])
 }
 
 enum TaskStatus {
@@ -34,4 +49,10 @@ enum TaskStatus {
   DOING
   DONE
   CANCELED
+}
+
+enum PermissionLevel {
+  OWNER
+  EXECUTOR
+  STAKEHOLDER
 }

@@ -95,7 +95,7 @@ describe('TaskService', () => {
       const mockTask: Task = { ...taskData, id: 1, createdAt: new Date(), updatedAt: new Date() };
       mockPrismaService.task.create.mockResolvedValue(mockTask);
 
-      const result = await service.createTask(taskData);
+      const result = await service.createTask(taskData, null);
       expect(result).toEqual(mockTask);
       expect(mockPrismaService.task.create).toHaveBeenCalledWith({ data: taskData });
     });
@@ -155,19 +155,57 @@ describe('TaskService', () => {
   });
 
   describe('getUserProjects', () => {
-    it('should return an array of project names', async () => {
-      const mockProjects = [
-        { project: 'Project 1' },
-        { project: 'Project 2' },
-        { project: 'Project 1' },
+    it('should return tasks grouped by project name', async () => {
+      const mockTasks: Task[] = [
+        {
+          id: 1,
+          title: 'Task 1',
+          project: 'Project 1',
+          status: TaskStatus.TO_DO,
+          description: '',
+          priority: 0,
+          deadline: null,
+          list: '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 2,
+          title: 'Task 2',
+          project: 'Project 2',
+          status: TaskStatus.DOING,
+          description: '',
+          priority: 1,
+          deadline: null,
+          list: '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 3,
+          title: 'Task 3',
+          project: 'Project 1',
+          status: TaskStatus.DONE,
+          description: '',
+          priority: 2,
+          deadline: null,
+          list: '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ];
-      mockPrismaService.task.findMany.mockResolvedValue(mockProjects);
+      mockPrismaService.task.findMany.mockResolvedValue(mockTasks);
 
       const result = await service.getUserProjects();
-      expect(result).toEqual(['Project 1', 'Project 2', 'Project 1']);
+      expect(result).toEqual({
+        'Project 1': [mockTasks[0], mockTasks[2]],
+        'Project 2': [mockTasks[1]],
+      });
       expect(mockPrismaService.task.findMany).toHaveBeenCalledWith({
-        select: { project: true },
-        distinct: ['project'],
+        take: 100,
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
     });
   });

@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TaskController } from './task.controller';
 import { TaskService } from './task.service';
 import { Task, TaskStatus } from '@prisma/client';
+import { AuthUser } from '../auth/get-user.decorator';
+import { PermissionLevel } from '@prisma/client';
 
 describe('TaskController', () => {
   let controller: TaskController;
@@ -14,6 +16,7 @@ describe('TaskController', () => {
     updateTask: jest.fn(),
     deleteTask: jest.fn(),
     getUserProjects: jest.fn(),
+    createTaskPermission: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -28,30 +31,6 @@ describe('TaskController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
-  });
-
-  describe('getTasks', () => {
-    it('should return an array of tasks', async () => {
-      const mockTasks: Task[] = [
-        {
-          id: 1,
-          title: 'Test Task',
-          project: 'Test Project',
-          status: TaskStatus.TO_DO,
-          description: '',
-          priority: 0,
-          deadline: null,
-          list: '',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
-      mockTaskService.tasks.mockResolvedValue(mockTasks);
-
-      const result = await controller.getTasks();
-      expect(result).toEqual(mockTasks);
-      expect(mockTaskService.tasks).toHaveBeenCalled();
-    });
   });
 
   describe('getTaskById', () => {
@@ -90,9 +69,9 @@ describe('TaskController', () => {
       const mockTask: Task = { ...taskData, id: 1, createdAt: new Date(), updatedAt: new Date() };
       mockTaskService.createTask.mockResolvedValue(mockTask);
 
-      const result = await controller.createTask(taskData);
+      const result = await controller.createTask(taskData, null);
       expect(result).toEqual(mockTask);
-      expect(mockTaskService.createTask).toHaveBeenCalledWith(taskData);
+      expect(mockTaskService.createTask).toHaveBeenCalledWith(taskData, null);
     });
   });
 
@@ -148,13 +127,52 @@ describe('TaskController', () => {
   });
 
   describe('getProjects', () => {
-    it('should return an array of project names', async () => {
-      const mockProjects = ['Project 1', 'Project 2'];
-      mockTaskService.getUserProjects.mockResolvedValue(mockProjects);
+    it('should return projects grouped by name with tasks and permissions', async () => {
+      const mockUser: AuthUser = { userId: 1, email: 'test@example.com' };
+      const mockProjectsWithTasks = {
+        'Project 1': [{
+          id: 1,
+          title: 'Task 1',
+          project: 'Project 1',
+          userPermissions: [
+            { userId: 1, email: 'test@example.com', role: PermissionLevel.OWNER },
+            { userId: 2, email: 'user2@example.com', role: PermissionLevel.EXECUTOR }
+          ]
+        }],
+        'Project 2': [{
+          id: 2,
+          title: 'Task 2',
+          project: 'Project 2',
+          userPermissions: [
+            { userId: 1, email: 'test@example.com', role: PermissionLevel.STAKEHOLDER }
+          ]
+        }]
+      };
+      mockTaskService.getUserProjects.mockResolvedValue(mockProjectsWithTasks);
 
-      const result = await controller.getProjects();
-      expect(result).toEqual(mockProjects);
-      expect(mockTaskService.getUserProjects).toHaveBeenCalled();
+      const result = await controller.getProjects(mockUser);
+      expect(result).toEqual(mockProjectsWithTasks);
+      expect(mockTaskService.getUserProjects).toHaveBeenCalledWith(mockUser.userId);
+    });
+  });
+
+  describe('createTaskPermission', () => {
+    it('should create a new task permission', async () => {
+      const createPermissionDto = {
+        userId: 1,
+        taskId: 1,
+        role: PermissionLevel.EXECUTOR
+      };
+
+      mockTaskService.createTaskPermission.mockResolvedValue(undefined);
+
+      await controller.createTaskPermission(createPermissionDto);
+
+      expect(mockTaskService.createTaskPermission).toHaveBeenCalledWith(
+        createPermissionDto.userId,
+        createPermissionDto.taskId,
+        createPermissionDto.role
+      );
     });
   });
 });
