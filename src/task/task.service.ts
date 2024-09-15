@@ -52,14 +52,22 @@ export class TaskService {
     return this.prisma.task.delete({ where });
   }
 
-  async getUserProjects(): Promise<string[]> {
+  async getUserProjects(): Promise<{ [project: string]: Task[] }> {
     const tasks = await this.prisma.task.findMany({
-      select: {
-        project: true
+      take: 100,
+      orderBy: {
+        createdAt: 'desc',
       },
-      distinct: ['project']
     });
 
-    return tasks.map(task => task.project);
+    const groupedTasks = tasks.reduce((acc, task) => {
+      if (!acc[task.project]) {
+        acc[task.project] = [];
+      }
+      acc[task.project].push(task);
+      return acc;
+    }, {} as { [project: string]: Task[] });
+
+    return groupedTasks;
   }
 }

@@ -9,7 +9,7 @@ export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Get('projects')
-  async getProjects(): Promise<string[]> {
+  async getProjects(): Promise<{ [project: string]: TaskModel[] }> {
     return this.taskService.getUserProjects();
   }
 

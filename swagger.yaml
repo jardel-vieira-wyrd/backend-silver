@@ -160,20 +160,22 @@ paths:
 
   /tasks/projects:
     get:
-      summary: Get all unique project names
+      summary: Get tasks grouped by project (limited to 100 tasks)
       tags:
         - Tasks
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: List of unique project names
+          description: Tasks grouped by project
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Task'
 
   /health:
     get:
