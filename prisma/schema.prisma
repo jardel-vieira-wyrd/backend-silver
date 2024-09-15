@@ -8,13 +8,12 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  name         String?
-  password     String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  createdTasks Task[]   @relation("CreatedBy")
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Task {
@@ -26,12 +25,6 @@ model Task {
   priority    Int?
   deadline    DateTime?
   list        String?
-  createdById Int
-  createdBy   User       @relation("CreatedBy", fields: [createdById], references: [id])
-  assignedTo  Int[]
-  readableBy  Int[]
-  editableBy  Int[]
-  updatableBy Int[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }

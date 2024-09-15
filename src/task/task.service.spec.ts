@@ -37,41 +37,43 @@ describe('TaskService', () => {
     it('should return an array of tasks', async () => {
       const mockTasks: Task[] = [
         {
-          id: 1, title: 'Test Task', project: 'Test Project', status: TaskStatus.TO_DO, createdById: 1, assignedTo: [], readableBy: [], editableBy: [], updatableBy: [], createdAt: new Date(), updatedAt: new Date(),
+          id: 1,
+          title: 'Test Task',
+          project: 'Test Project',
+          status: TaskStatus.TO_DO,
           description: '',
           priority: 0,
-          deadline: undefined,
-          list: ''
+          deadline: null,
+          list: '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ];
       mockPrismaService.task.findMany.mockResolvedValue(mockTasks);
 
-      const result = await service.tasks(1);
+      const result = await service.tasks();
       expect(result).toEqual(mockTasks);
-      expect(mockPrismaService.task.findMany).toHaveBeenCalledWith({
-        where: {
-          OR: [
-            { createdById: 1 },
-            { updatableBy: { has: 1 } },
-            { readableBy: { has: 1 } }
-          ]
-        }
-      });
+      expect(mockPrismaService.task.findMany).toHaveBeenCalledWith();
     });
   });
 
   describe('task', () => {
     it('should return a single task', async () => {
       const mockTask: Task = {
-        id: 1, title: 'Test Task', project: 'Test Project', status: TaskStatus.TO_DO, createdById: 1, assignedTo: [], readableBy: [], editableBy: [], updatableBy: [], createdAt: new Date(), updatedAt: new Date(),
+        id: 1,
+        title: 'Test Task',
+        project: 'Test Project',
+        status: TaskStatus.TO_DO,
         description: '',
         priority: 0,
-        deadline: undefined,
-        list: ''
+        deadline: null,
+        list: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
       mockPrismaService.task.findUnique.mockResolvedValue(mockTask);
 
-      const result = await service.task({ id: 1 }, 1);
+      const result = await service.task({ id: 1 });
       expect(result).toEqual(mockTask);
       expect(mockPrismaService.task.findUnique).toHaveBeenCalledWith({
         where: { id: 1 }
@@ -79,5 +81,94 @@ describe('TaskService', () => {
     });
   });
 
-  // Add more tests for createTask, updateTask, deleteTask, and getUserProjects methods
+  describe('createTask', () => {
+    it('should create a new task', async () => {
+      const taskData = {
+        title: 'New Task',
+        project: 'New Project',
+        status: TaskStatus.TO_DO,
+        description: 'Task description',
+        priority: 1,
+        deadline: new Date(),
+        list: 'To-Do List',
+      };
+      const mockTask: Task = { ...taskData, id: 1, createdAt: new Date(), updatedAt: new Date() };
+      mockPrismaService.task.create.mockResolvedValue(mockTask);
+
+      const result = await service.createTask(taskData);
+      expect(result).toEqual(mockTask);
+      expect(mockPrismaService.task.create).toHaveBeenCalledWith({ data: taskData });
+    });
+  });
+
+  describe('updateTask', () => {
+    it('should update an existing task', async () => {
+      const taskData = {
+        title: 'Updated Task',
+        status: TaskStatus.DOING,
+      };
+      const mockTask: Task = {
+        id: 1,
+        title: 'Updated Task',
+        project: 'Test Project',
+        status: TaskStatus.DOING,
+        description: '',
+        priority: 0,
+        deadline: null,
+        list: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrismaService.task.update.mockResolvedValue(mockTask);
+
+      const result = await service.updateTask({ where: { id: 1 }, data: taskData });
+      expect(result).toEqual(mockTask);
+      expect(mockPrismaService.task.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: taskData,
+      });
+    });
+  });
+
+  describe('deleteTask', () => {
+    it('should delete a task', async () => {
+      const mockTask: Task = {
+        id: 1,
+        title: 'Test Task',
+        project: 'Test Project',
+        status: TaskStatus.TO_DO,
+        description: '',
+        priority: 0,
+        deadline: null,
+        list: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrismaService.task.delete.mockResolvedValue(mockTask);
+
+      const result = await service.deleteTask({ id: 1 });
+      expect(result).toEqual(mockTask);
+      expect(mockPrismaService.task.delete).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+    });
+  });
+
+  describe('getUserProjects', () => {
+    it('should return an array of project names', async () => {
+      const mockProjects = [
+        { project: 'Project 1' },
+        { project: 'Project 2' },
+        { project: 'Project 1' },
+      ];
+      mockPrismaService.task.findMany.mockResolvedValue(mockProjects);
+
+      const result = await service.getUserProjects();
+      expect(result).toEqual(['Project 1', 'Project 2', 'Project 1']);
+      expect(mockPrismaService.task.findMany).toHaveBeenCalledWith({
+        select: { project: true },
+        distinct: ['project'],
+      });
+    });
+  });
 });

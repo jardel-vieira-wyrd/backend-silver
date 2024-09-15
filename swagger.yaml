@@ -53,7 +53,7 @@ paths:
 
   /tasks:
     get:
-      summary: Get all tasks for the authenticated user
+      summary: Get all tasks
       tags:
         - Tasks
       security:
@@ -81,11 +81,15 @@ paths:
               $ref: '#/components/schemas/TaskCreate'
       responses:
         '201':
-          description: Task created successfully
+          description: Created
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
 
   /tasks/{id}:
     get:
@@ -154,6 +158,23 @@ paths:
         '404':
           description: Task not found
 
+  /tasks/projects:
+    get:
+      summary: Get all unique project names
+      tags:
+        - Tasks
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of unique project names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
   /health:
     get:
       summary: Health check endpoint
@@ -218,7 +239,14 @@ components:
     AuthResponse:
       type: object
       properties:
-        access_token:
+        user:
+          type: object
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+        token:
           type: string
 
     TaskCreate:
@@ -233,6 +261,17 @@ components:
           type: string
         description:
           type: string
+        status:
+          type: string
+          enum: [TO_DO, DOING, DONE, CANCELED]
+          default: TO_DO
+        priority:
+          type: integer
+        deadline:
+          type: string
+          format: date-time
+        list:
+          type: string
 
     TaskUpdate:
       type: object
@@ -241,9 +280,18 @@ components:
           type: string
         project:
           type: string
+        description:
+          type: string
         status:
           type: string
-          enum: [TO_DO, DOING, DONE]
+          enum: [TO_DO, DOING, DONE, CANCELED]
+        priority:
+          type: integer
+        deadline:
+          type: string
+          format: date-time
+        list:
+          type: string
 
     Task:
       type: object
@@ -254,13 +302,18 @@ components:
           type: string
         project:
           type: string
-        status:
-          type: string
-          enum: [TO_DO, DOING, DONE]
         description:
           type: string
-        createdById:
+        status:
+          type: string
+          enum: [TO_DO, DOING, DONE, CANCELED]
+        priority:
           type: integer
+        deadline:
+          type: string
+          format: date-time
+        list:
+          type: string
         createdAt:
           type: string
           format: date-time

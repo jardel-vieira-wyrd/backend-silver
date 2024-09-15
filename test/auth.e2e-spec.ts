@@ -46,13 +46,12 @@ describe('AuthController (e2e)', () => {
         .send({ name: 'Test User', email: 'test@example.com', password: 'password' })
         .expect(201);
 
-      expect(response.body).toHaveProperty('id');
-      expect(response.body.email).toBe('test@example.com');
-
-      // Verify the user was created in the database
-      const user = await prisma.user.findUnique({ where: { email: 'test@example.com' } });
-      expect(user).toBeDefined();
-      expect(user?.email).toBe('test@example.com');
+      expect(response.body).toHaveProperty('user');
+      expect(response.body).toHaveProperty('token');
+      expect(response.body.user).toHaveProperty('name');
+      expect(response.body.user).toHaveProperty('email');
+      expect(response.body.user.email).toBe('test@example.com');
+      expect(response.body.user.name).toBe('Test User');
     });
   });
 
