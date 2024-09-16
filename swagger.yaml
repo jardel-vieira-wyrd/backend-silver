@@ -199,6 +199,25 @@ paths:
                     type: string
                     example: "API is running"
 
+  /users:
+    get:
+      summary: Get all users (limited to 100)
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserBasicInfo'
+        '401':
+          description: Unauthorized
+
   /tasks/permissions:
     post:
       summary: Create a new permission for a user on a task
@@ -254,6 +273,16 @@ components:
         password:
           type: string
           format: password
+  
+    UserBasicInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
 
     UserResponse:
       type: object

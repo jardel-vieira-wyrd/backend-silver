@@ -67,4 +67,18 @@ export class UserService {
       where,
     });
   }
+
+  async findAllUsers(): Promise<{ id: number; name: string; email: string }[]> {
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+      take: 100,
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
 }

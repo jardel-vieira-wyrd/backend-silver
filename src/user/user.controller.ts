@@ -11,8 +11,11 @@ import {
 import { UserService } from './user.service';
 import { User as UserModel } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('user')
+@ApiTags('Users')
+@Controller('users')
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -23,19 +26,16 @@ export class UserController {
     return this.userService.createUser(userData);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get()
-  async getAllUsers(): Promise<UserModel[]> {
-    return this.userService.users({});
+  async getAllUsers() {
+    return this.userService.findAllUsers();
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getUserById(@Param('id') id: string): Promise<UserModel> {
     return this.userService.user({ id: Number(id) });
   }
 
-  @UseGuards(JwtAuthGuard)
   @Put(':id')
   async updateUser(
     @Param('id') id: string,
@@ -47,7 +47,6 @@ export class UserController {
     });
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async deleteUser(@Param('id') id: string): Promise<UserModel> {
     return this.userService.deleteUser({ id: Number(id) });

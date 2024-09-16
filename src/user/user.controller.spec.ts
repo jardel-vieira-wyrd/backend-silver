@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 describe('UserController', () => {
   let controller: UserController;
+  let service: UserService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -23,13 +24,32 @@ describe('UserController', () => {
             },
           },
         },
+        {
+          provide: UserService,
+          useValue: {
+            findAllUsers: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     controller = module.get<UserController>(UserController);
+    service = module.get<UserService>(UserService);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('getAllUsers', () => {
+    it('should return an array of users', async () => {
+      const result = [
+        { id: 1, name: 'John Doe', email: 'john@example.com' },
+        { id: 2, name: 'Jane Doe', email: 'jane@example.com' },
+      ];
+      jest.spyOn(service, 'findAllUsers').mockImplementation(async () => result);
+
+      expect(await controller.getAllUsers()).toBe(result);
+    });
   });
 });
