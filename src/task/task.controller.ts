@@ -57,6 +57,7 @@ export class TaskController {
   async createTaskPermission(
     @Body() createPermissionDto: { userId: number; taskId: number; role: PermissionLevel }
   ): Promise<void> {
+    console.log(createPermissionDto);
     const { userId, taskId, role } = createPermissionDto;
     await this.taskService.createTaskPermission(userId, taskId, role);
   }

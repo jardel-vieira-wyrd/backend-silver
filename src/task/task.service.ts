@@ -137,7 +137,7 @@ export class TaskService {
     return groupedTasks;
   }
 
-  async createTaskPermission(userId: number, taskId: number, role: PermissionLevel): Promise<void> {
+  async createTaskPermission(userId: number, taskId: number, role: PermissionLevel | 'NONE'): Promise<void> {
     // Check if the task exists
     const task = await this.prisma.task.findUnique({ where: { id: taskId } });
     if (!task) {
@@ -150,27 +150,71 @@ export class TaskService {
       throw new NotFoundException('User not found');
     }
 
-    // Check if the permission already exists
-    const existingPermission = await this.prisma.taskPermission.findUnique({
-      where: {
-        userId_taskId: {
+    if (role === 'NONE') {
+      // If role is 'NONE', delete the STAKEHOLDER permission if it exists
+      await this.prisma.taskPermission.deleteMany({
+        where: {
           userId: userId,
-          taskId: taskId
+          taskId: taskId,
+          role: PermissionLevel.STAKEHOLDER
         }
-      }
-    });
-
-    if (existingPermission) {
-      throw new ConflictException('Permission already exists for this user on this task');
+      });
+      return;
     }
 
-    // Create the new permission
-    await this.prisma.taskPermission.create({
-      data: {
+    // Check if the specific permission already exists
+    const existingPermission = await this.prisma.taskPermission.findFirst({
+      where: {
         userId: userId,
         taskId: taskId,
         role: role
       }
     });
+
+    if (existingPermission) {
+      // If the permission already exists, do nothing
+      return;
+    }
+
+    // Handle based on the role
+    switch (role) {
+      case PermissionLevel.EXECUTOR:
+        // Check if an EXECUTOR permission already exists for this task
+        const existingExecutorPermission = await this.prisma.taskPermission.findFirst({
+          where: {
+            taskId: taskId,
+            role: PermissionLevel.EXECUTOR
+          }
+        });
+
+        if (existingExecutorPermission) {
+          // If an EXECUTOR permission exists, update it
+          await this.prisma.taskPermission.update({
+            where: { id: existingExecutorPermission.id },
+            data: { userId: userId }
+          });
+        } else {
+          // If no EXECUTOR permission exists, create a new one
+          await this.prisma.taskPermission.create({
+            data: {
+              userId: userId,
+              taskId: taskId,
+              role: PermissionLevel.EXECUTOR
+            }
+          });
+        }
+        break;
+
+      default: // This will handle OWNER, STAKEHOLDER, and any other roles
+        // Create the new permission
+        await this.prisma.taskPermission.create({
+          data: {
+            userId: userId,
+            taskId: taskId,
+            role: role
+          }
+        });
+        break;
+    }
   }
 }
