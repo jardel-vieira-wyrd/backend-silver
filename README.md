@@ -75,17 +75,16 @@ To run the application in development mode with hot-reloading:
    npm run start:dev
    ```
 
-## Additional Commands
-
-- `npm run build`: Build the application
-- `npm run start:prod`: Start the application in production mode
-- `npm run test`: Run tests
-- `npm run lint`: Lint the codebase
-
 ## Test Results
 
-The project has a comprehensive test suite. Here are the latest test results:
+### Unit Tests
 
+Run unit tests with:
+```
+npm run test
+```
+
+Latest unit test results:
 ```
 Test Suites: 8 passed, 8 total
 Tests:       33 passed, 33 total
@@ -93,7 +92,9 @@ Snapshots:   0 total
 Time:        9.873 s
 ```
 
-All tests are currently passing, ensuring the reliability and stability of the c
+### End-to-End (E2E) Tests
+
+Run E2E tests with:
 
 ## Frontend Repository
 

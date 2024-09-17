@@ -8,7 +8,6 @@ export interface AuthUser {
 export const GetUser = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): AuthUser => {
     const request = ctx.switchToHttp().getRequest();
-    console.log('GetUser decorator - request.user:', request.user);
     return request.user;
   },
 );
