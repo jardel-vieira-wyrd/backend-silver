@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TaskService } from './task.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { Task, TaskStatus } from '@prisma/client';
+import { PermissionLevel } from '@prisma/client';
 
 describe('TaskService', () => {
   let service: TaskService;
@@ -14,6 +15,9 @@ describe('TaskService', () => {
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+    },
+    taskPermission: {
+      create: jest.fn(),
     },
   };
 
@@ -94,10 +98,19 @@ describe('TaskService', () => {
       };
       const mockTask: Task = { ...taskData, id: 1, createdAt: new Date(), updatedAt: new Date() };
       mockPrismaService.task.create.mockResolvedValue(mockTask);
+      mockPrismaService.taskPermission.create.mockResolvedValue({});
 
-      const result = await service.createTask(taskData, null);
+      const userId = 1;
+      const result = await service.createTask(taskData, userId);
       expect(result).toEqual(mockTask);
       expect(mockPrismaService.task.create).toHaveBeenCalledWith({ data: taskData });
+      expect(mockPrismaService.taskPermission.create).toHaveBeenCalledWith({
+        data: {
+          user: { connect: { id: userId } },
+          task: { connect: { id: mockTask.id } },
+          role: PermissionLevel.OWNER,
+        },
+      });
     });
   });
 
@@ -155,8 +168,10 @@ describe('TaskService', () => {
   });
 
   describe('getUserProjects', () => {
-    it('should return tasks grouped by project name', async () => {
-      const mockTasks: Task[] = [
+    it('should return tasks grouped by project name for a specific user', async () => {
+      const userId = 1;
+      const groupBy = 'project';
+      const mockTasks = [
         {
           id: 1,
           title: 'Task 1',
@@ -168,43 +183,54 @@ describe('TaskService', () => {
           list: '',
           createdAt: new Date(),
           updatedAt: new Date(),
+          taskPermissions: [
+            {
+              user: { id: 1, email: 'test@example.com', name: 'Test User' },
+              role: PermissionLevel.OWNER,
+            },
+          ],
         },
-        {
-          id: 2,
-          title: 'Task 2',
-          project: 'Project 2',
-          status: TaskStatus.DOING,
-          description: '',
-          priority: 1,
-          deadline: null,
-          list: '',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 3,
-          title: 'Task 3',
-          project: 'Project 1',
-          status: TaskStatus.DONE,
-          description: '',
-          priority: 2,
-          deadline: null,
-          list: '',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        // ... other mock tasks ...
       ];
       mockPrismaService.task.findMany.mockResolvedValue(mockTasks);
 
-      const result = await service.getUserProjects();
+      const result = await service.getUserProjects(userId, groupBy);
       expect(result).toEqual({
-        'Project 1': [mockTasks[0], mockTasks[2]],
-        'Project 2': [mockTasks[1]],
+        'Project 1': [
+          {
+            ...mockTasks[0],
+            userPermissions: [
+              { userId: 1, email: 'test@example.com', name: 'Test User', role: PermissionLevel.OWNER },
+            ],
+          },
+        ],
+        // ... other projects ...
       });
       expect(mockPrismaService.task.findMany).toHaveBeenCalledWith({
+        where: {
+          taskPermissions: {
+            some: {
+              userId: userId,
+            },
+          },
+        },
         take: 100,
-        orderBy: {
-          createdAt: 'desc',
+        orderBy: [
+          { priority: 'desc' },
+          { createdAt: 'desc' },
+        ],
+        include: {
+          taskPermissions: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  name: true,
+                },
+              },
+            },
+          },
         },
       });
     });

@@ -134,7 +134,7 @@ export class TaskService {
       if (statusDiff !== 0) return statusDiff;
       return b.priority - a.priority;
     });
-    console.log(groupBy);
+
     if (groupBy === 'user') {
       const groupedByUser = sortedTasks.reduce((acc, task) => {
         task.userPermissions.forEach(userPermission => {

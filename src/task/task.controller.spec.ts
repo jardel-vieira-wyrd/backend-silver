@@ -1,9 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TaskController } from './task.controller';
 import { TaskService } from './task.service';
-import { Task, TaskStatus } from '@prisma/client';
+import { Task, TaskStatus, PermissionLevel } from '@prisma/client';
 import { AuthUser } from '../auth/get-user.decorator';
-import { PermissionLevel } from '@prisma/client';
 
 describe('TaskController', () => {
   let controller: TaskController;
@@ -69,9 +68,10 @@ describe('TaskController', () => {
       const mockTask: Task = { ...taskData, id: 1, createdAt: new Date(), updatedAt: new Date() };
       mockTaskService.createTask.mockResolvedValue(mockTask);
 
-      const result = await controller.createTask(taskData, null);
+      const mockUser: AuthUser = { userId: 1, email: 'test@example.com' };
+      const result = await controller.createTask(taskData, mockUser);
       expect(result).toEqual(mockTask);
-      expect(mockTaskService.createTask).toHaveBeenCalledWith(taskData, null);
+      expect(mockTaskService.createTask).toHaveBeenCalledWith(taskData, mockUser.userId);
     });
   });
 
@@ -150,9 +150,19 @@ describe('TaskController', () => {
       };
       mockTaskService.getUserProjects.mockResolvedValue(mockProjectsWithTasks);
 
-      const result = await controller.getProjects(mockUser);
+      const groupBy = 'project';
+      const result = await controller.getProjects(mockUser, groupBy);
       expect(result).toEqual(mockProjectsWithTasks);
-      expect(mockTaskService.getUserProjects).toHaveBeenCalledWith(mockUser.userId);
+      expect(mockTaskService.getUserProjects).toHaveBeenCalledWith(mockUser.userId, groupBy);
+    });
+
+    it('should call getUserProjects with undefined groupBy when not provided', async () => {
+      const mockUser: AuthUser = { userId: 1, email: 'test@example.com' };
+      const mockProjectsWithTasks = { /* ... */ };
+      mockTaskService.getUserProjects.mockResolvedValue(mockProjectsWithTasks);
+
+      await controller.getProjects(mockUser);
+      expect(mockTaskService.getUserProjects).toHaveBeenCalledWith(mockUser.userId, undefined);
     });
   });
 

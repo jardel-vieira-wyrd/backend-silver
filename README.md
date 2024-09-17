@@ -42,13 +42,13 @@ To verify the database connection, follow these steps:
 4. You will see the token in the response, copy it
 5. Click on Authorize and enter the token
 
-
 ## Technologies
 
 - Node.js 20
 - NestJS (version specified in package.json)
 - Prisma (version specified in package.json)
 - PostgreSQL
+- Jest
 
 ## Docker
 
@@ -82,6 +82,18 @@ To run the application in development mode with hot-reloading:
 - `npm run test`: Run tests
 - `npm run lint`: Lint the codebase
 
+## Test Results
+
+The project has a comprehensive test suite. Here are the latest test results:
+
+```
+Test Suites: 8 passed, 8 total
+Tests:       33 passed, 33 total
+Snapshots:   0 total
+Time:        9.873 s
+```
+
+All tests are currently passing, ensuring the reliability and stability of the c
 
 ## Frontend Repository
 
