@@ -160,14 +160,21 @@ paths:
 
   /tasks/projects:
     get:
-      summary: Get tasks grouped by project with user permissions
+      summary: Get tasks grouped by project or user email with user permissions
       tags:
         - Tasks
       security:
         - bearerAuth: []
+      parameters:
+        - in: query
+          name: groupByUser
+          schema:
+            type: boolean
+          required: false
+          description: If true, groups tasks by user email instead of project
       responses:
         '200':
-          description: Tasks grouped by project with user permissions
+          description: Tasks grouped by project or user email with user permissions
           content:
             application/json:
               schema:

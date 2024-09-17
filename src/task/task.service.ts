@@ -88,7 +88,7 @@ export class TaskService {
     return this.prisma.task.delete({ where });
   }
 
-  async getUserProjects(userId: number): Promise<{ [project: string]: TaskWithPermissions[] }> {
+  async getUserProjects(userId: number, groupBy: string): Promise<{ [key: string]: TaskWithPermissions[] }> {
     const tasks = await this.prisma.task.findMany({
       where: {
         taskPermissions: {
@@ -104,37 +104,63 @@ export class TaskService {
               select: {
                 id: true,
                 email: true,
-                name: true // Added name
+                name: true
               }
             }
           }
         }
       },
-      orderBy: {
-        createdAt: 'desc'
-      },
+      orderBy: [
+        { priority: 'desc' },
+        { createdAt: 'desc' }
+      ],
       take: 100
     });
+
+    const statusOrder = ['DOING', 'TO_DO', 'DONE', 'CANCELED'];
 
     const tasksWithPermissions: TaskWithPermissions[] = tasks.map(task => ({
       ...task,
       userPermissions: task.taskPermissions.map(permission => ({
         userId: permission.user.id,
         email: permission.user.email,
-        name: permission.user.name, // Added name
+        name: permission.user.name,
         role: permission.role
       }))
     }));
 
-    const groupedTasks = tasksWithPermissions.reduce((acc, task) => {
-      if (!acc[task.project]) {
-        acc[task.project] = [];
-      }
-      acc[task.project].push(task);
-      return acc;
-    }, {} as { [project: string]: TaskWithPermissions[] });
+    const sortedTasks = tasksWithPermissions.sort((a, b) => {
+      const statusDiff = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+      if (statusDiff !== 0) return statusDiff;
+      return b.priority - a.priority;
+    });
+    console.log(groupBy);
+    if (groupBy === 'user') {
+      const groupedByUser = sortedTasks.reduce((acc, task) => {
+        task.userPermissions.forEach(userPermission => {
+          const email = userPermission.email;
+          if (!acc[email]) {
+            acc[email] = [];
+          }
+          if (!acc[email].some(t => t.id === task.id)) {
+            acc[email].push(task);
+          }
+        });
+        return acc;
+      }, {} as { [email: string]: TaskWithPermissions[] });
 
-    return groupedTasks;
+      return groupedByUser;
+    } else {
+      const groupedByProject = sortedTasks.reduce((acc, task) => {
+        if (!acc[task.project]) {
+          acc[task.project] = [];
+        }
+        acc[task.project].push(task);
+        return acc;
+      }, {} as { [project: string]: TaskWithPermissions[] });
+
+      return groupedByProject;
+    }
   }
 
   async createTaskPermission(userId: number, taskId: number, role: PermissionLevel | 'NONE'): Promise<void> {
@@ -218,3 +244,4 @@ export class TaskService {
     }
   }
 }
+

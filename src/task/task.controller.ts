@@ -1,19 +1,27 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { Prisma, Task as TaskModel, TaskStatus } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { GetUser } from '../auth/get-user.decorator';
 import { AuthUser } from '../auth/get-user.decorator';
 import { PermissionLevel } from '@prisma/client';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
+@ApiTags('tasks')
 @Controller('tasks')
 @UseGuards(JwtAuthGuard)
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Get('projects')
-  async getProjects(@GetUser() user: AuthUser): Promise<{ [project: string]: TaskModel[] }> {
-    return this.taskService.getUserProjects(user.userId);
+  @ApiOperation({ summary: 'Get user projects' })
+  @ApiResponse({ status: 200, description: 'Return user projects' })
+  @ApiQuery({ name: 'groupByUser', required: false, type: Boolean })
+  async getProjects(
+    @GetUser() user: AuthUser,
+    @Query('groupBy') groupBy?: string
+  ): Promise<{ [key: string]: TaskModel[] }> {
+    return this.taskService.getUserProjects(user.userId, groupBy);
   }
 
   @Get(':id')

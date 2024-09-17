@@ -32,16 +32,16 @@ This project includes Swagger UI for API documentation. Once the server is runni
 
 `http://localhost:3000/api`
 
-## Database Access
+## Database Connection from Backend
 
-To access the database using Prisma Studio:
+To verify the database connection, follow these steps:
 
-1. Ensure the database container is running
-2. Run the following command:
-   ```
-   npx prisma studio
-   ```
-3. Prisma Studio will be available at `http://localhost:5555`
+1. In Swagger (http://localhost:3000/api), click on POST /auth/register
+2. Click on "Try it out"
+3. Click on "Execute"
+4. You will see the token in the response, copy it
+5. Click on Authorize and enter the token
+
 
 ## Technologies
 
@@ -83,3 +83,6 @@ To run the application in development mode with hot-reloading:
 - `npm run lint`: Lint the codebase
 
 
+## Frontend Repository
+
+https://github.com/jardel-vieira-wyrd/frontend-silver
