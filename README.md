@@ -4,7 +4,7 @@ This is the backend service for the Silver Task Manager project. It's built with
 
 The database schema is the following:
 
-users
+Model User
 - id
 - name
 - email
@@ -12,7 +12,7 @@ users
 - createdAt
 - updatedAt
 
-tasks
+Model Task
 - id
 - project (string, project name)
 - title
@@ -23,7 +23,7 @@ tasks
 - createdAt
 - updatedAt
 
-TaskPermissions
+Model TaskPermission
 - id
 - userId
 - taskId
