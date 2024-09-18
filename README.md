@@ -39,7 +39,7 @@ The main endpoints are:
 - GET /tasks/:id (get a task by id)
 - PUT /tasks/:id (update a task by id)
 - DELETE /tasks/:id (delete a task by id)
-- POST /tasks/:id/permissions (add a permission to a task)
+- POST /tasks/permissions/:userId/:taskId/:role (add a permission role to a user for a task)
 - GET /tasks/projects/:groupBy (list all organization projects and tasks)
 
 ## Technologies
