@@ -1,6 +1,45 @@
-# Backend Silver
+# Backend Silver Task Manager
 
-This is the backend service for the Silver project. It's built with NestJS and uses Prisma as an ORM.
+This is the backend service for the Silver Task Manager project. It's built with NestJS and uses Prisma as an ORM.
+
+The database schema is the following:
+
+users
+- id
+- name
+- email
+- password
+- createdAt
+- updatedAt
+
+tasks
+- id
+- project (string, project name)
+- title
+- description
+- dueDate
+- status (enum: 'TO_DO', 'IN_PROGRESS', 'DONE')
+- priority (0 to 5, 5 being the highest priority)
+- createdAt
+- updatedAt
+
+TaskPermissions
+- id
+- userId
+- taskId
+- role (enum: 'OWNER', 'EXECUTOR', 'STAKEHOLDER')
+- createdAt
+- updatedAt
+
+The main endpoints are:
+
+- POST /auth/register
+- POST /auth/login
+- POST /tasks (create a task)
+- GET /tasks/:id (get a task by id)
+- PUT /tasks/:id (update a task by id)
+- DELETE /tasks/:id (delete a task by id)
+- GET /tasks/projects/:groupBy (list all organization projects and tasks)
 
 ## Technologies
 
