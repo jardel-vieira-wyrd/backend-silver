@@ -50,5 +50,4 @@ describe('TaskController (e2e)', () => {
     expect(response.body.project).toBe('New Test Project');
   });
 
-  // You can add more tests for other endpoints here
 });

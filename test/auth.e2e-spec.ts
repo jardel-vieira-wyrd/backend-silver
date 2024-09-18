@@ -55,5 +55,5 @@ describe('AuthController (e2e)', () => {
     expect(response.body).toHaveProperty('message', 'Email already exists');
   });
 
-  // Add more tests for login, etc.
+  // todo: Add more tests for login, etc.
 });
