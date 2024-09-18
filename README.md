@@ -2,9 +2,13 @@
 
 This is the backend service for the Silver project. It's built with NestJS and uses Prisma as an ORM.
 
-## Repository
+## Technologies
 
-https://github.com/jardel-vieira-wyrd/backend-silver
+- Node.js 20
+- NestJS 10.0.0
+- Prisma 5.19.1
+- PostgreSQL 13
+- Jest 29.5.0
 
 ## Prerequisites
 
@@ -24,31 +28,21 @@ https://github.com/jardel-vieira-wyrd/backend-silver
    docker-compose up --build
    ```
 
-3. The server should now be running at `http://localhost:3000`
+3. The server should now be running at [http://localhost:3000](http://localhost:3000)
 
 ## API Documentation
 
 This project includes Swagger UI for API documentation. Once the server is running, you can access the Swagger UI at:
 
-`http://localhost:3000/api`
-
-## Database Connection from Backend
+[http://localhost:3000/api](http://localhost:3000/api)
 
 To verify the database connection, follow these steps:
 
-1. In Swagger (http://localhost:3000/api), click on POST /auth/register
+1. In Swagger,click on POST /auth/register
 2. Click on "Try it out"
 3. Click on "Execute"
 4. You will see the token in the response, copy it
 5. Click on Authorize and enter the token
-
-## Technologies
-
-- Node.js 20
-- NestJS (version specified in package.json)
-- Prisma (version specified in package.json)
-- PostgreSQL
-- Jest
 
 ## Docker
 
@@ -95,6 +89,15 @@ Time:        9.873 s
 ### End-to-End (E2E) Tests
 
 Run E2E tests with:
+```
+npm run test:e2e
+```
+
+Latest E2E test results:
+```
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Time:        1.001 s
 
 ## Frontend Repository
 
